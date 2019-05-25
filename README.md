@@ -17,8 +17,17 @@ https://dash.plot.ly/installation
 
 ## Development Guideline
 
+### Dash
+The root of webpage DOM is set in `app.py`:
+```python
+from components.example_layout import example_layout
+# ...
+app.layout = example_layout
+```
+where `example_layout` is just a component created with `Container` (a wrapper of `Div`)
+
 ### Grid System
-The project uses the grid system from [Skeleton.css](http://getskeleton.com/), with its wrapper functions in `components/utils.py`.  Basically a webpage consists of rows, where a row has 12 columns inside it.
+The project uses the grid system from [Skeleton.css](http://getskeleton.com/), with its wrapper functions in `components/utils.py`.  Basically a webpage consists of rows, where a row has 12 columns inside it. The root of webpage must be `Container`.
 
 Coding a layout goes like this:
 1. Add a block that fills webpage horizonally with `Row(...)`
