@@ -17,6 +17,7 @@ https://dash.plot.ly/installation
 
 ## Development Guideline
 
+### Grid System
 The project uses the grid system from [Skeleton.css](http://getskeleton.com/), with its wrapper functions in `components/utils.py`.  Basically a webpage consists of rows, where a row has 12 columns inside it.
 
 Coding a layout goes like this:
