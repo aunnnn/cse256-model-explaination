@@ -9,5 +9,8 @@ Team members:
 ## Installation
 This project is built with [Dash](https://dash.plot.ly), a Python framework for building interactive web applications.
 
+Install Dash:
+https://dash.plot.ly/installation
+
 ## To Run
 `python app.py`
