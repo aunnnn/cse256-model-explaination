@@ -8,14 +8,14 @@ from components.example_layout import example_layout
 external_stylesheets = [
     'https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css',
     # 'https://codepen.io/chriddyp/pen/bWLwgP.css',
-    '/static/main.css'
+    '/assets/main.css'
 ]
 
 # Main app
 app = dash.Dash(
     __name__, 
     external_stylesheets=external_stylesheets,
-    static_folder='static')
+    static_folder='assets')
 
 # Root of all views
 app.layout = example_layout
