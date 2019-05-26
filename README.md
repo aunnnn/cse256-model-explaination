@@ -20,9 +20,9 @@ https://dash.plot.ly/installation
 ### Dash
 The root of webpage DOM is set in `app.py`:
 ```python
-from components.example_layout import example_layout
-# ...
-app.layout = example_layout
+from components.example_layout import ExampleLayout
+layout = ExampleLayout() # child of BaseComponent, see example_layout.py
+app.layout = layout.render()
 ```
 where `example_layout` is just a component created with `Container` (a wrapper of `Div`)
 
