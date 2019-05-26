@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 header_text = '''
 ## CSE 256: Explanation of NLP Classifier
 
-This is written in Markdown format.
+This is written in Markdown format using `Markdown(...)` (or `dcc.Markdown(...)`).
 '''
 
 # Create multiple bars
