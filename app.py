@@ -19,6 +19,7 @@ app = dash.Dash(
 
 # Root of all views
 app.layout = example_layout
+app.title = 'CSE 256 - Model Explanation'
 
 # Server when deploy* (view Procfile)
 server = app.server
