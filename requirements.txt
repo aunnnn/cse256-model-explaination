@@ -8,3 +8,5 @@ plotly==3.7.0
 
 numpy==1.16.2
 matplotlib==3.0.3
+
+gunicorn
