@@ -25,26 +25,9 @@ def Row(children):
 
 def MultiColumn(num_columns, children):
     return html.Div(children, className=f'{number_to_literal[num_columns]} columns')
-    
-def Div(children, **kwargs):
-    return html.Div(children, *kwargs)
 
 def Markdown(md):
     return dcc.Markdown(md)
-
-def Input(type, label=None, **kwargs):
-    """
-    Wrapper for <input> tag, if label (str) is provided, also add <label> on top of hte input.
-    """
-    kwargs = {k:v if v is not None else UNDEFINED for k,v in kwargs.items()}
-    if label:
-        id = kwargs.get('id', UNDEFINED)
-        return Div([
-            html.Label(children=label, htmlFor=id),
-            dcc.Input(type=type, *kwargs),
-        ])
-    else:
-        return dcc.Input(type=type, *kwargs)
 
 def TextField(id, value=None, placeholder=None, label=None):
     tf = dcc.Input(type='text', id=id, value=value, placeholder=placeholder)
@@ -55,15 +38,17 @@ def Slider(id, min, max, step=1, value=None, label=None):
 
 
 def AddLabel(html_input, label=None):
+    """
+    Convenience for adding html <label> to input field
+    """
     id = html_input.id
     if label:
-        return Div([
+        return html.Div([
             html.Label(children=label, htmlFor=id),
             html_input,
         ])
     else:
         return html_input
-    
     
 
 def MatplotlibFigure(id, fig, size_in_pixels):

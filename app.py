@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-from components.example_layout import example_layout
+from components.example_layout import ExampleLayout
 
 external_stylesheets = [
     'https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css',
@@ -18,11 +18,16 @@ app = dash.Dash(
     static_folder='assets')
 
 # Root of all views
-app.layout = example_layout
+main_layout = ExampleLayout()
+
+app.layout = main_layout.render()
 app.title = 'CSE 256 - Model Explanation'
 
-# Server when deploy* (view Procfile)
+main_layout.register_callbacks(app)
+
+# Server when deploy* (see `Procfile`)
 server = app.server
+PORT = 3000
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=PORT)
