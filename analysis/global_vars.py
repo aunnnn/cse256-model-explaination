@@ -4,6 +4,8 @@ from analysis.misc import renamed_load
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+import nltk
+nltk.download('punkt')
 
 fv = None
 clf = None

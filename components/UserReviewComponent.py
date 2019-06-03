@@ -95,19 +95,7 @@ class UserReviewComponent(BaseComponent):
             new_text = model_analysis.preprocess(raw_input_text)
             data['preprocessed_input'] = new_text
             return data
-
-        # for i in range(100):
-        #     tag_id = f'splitted-text-{i}'
-        #     @app.callback(
-        #         Output(tag_id, 'className'),
-        #         [Input(tag_id, 'n_clicks')])
-        #     def on_click_tag(n_clicks):
-        #         if n_clicks is not None:
-        #             if n_clicks % 2 == 1:
-        #                 return 'ui red label unseen'
-        #             else:
-        #                 return 'ui basic label'
-
+            
         @app.callback(
             Output(component_id='input-text-splitted', component_property='children'),
             [
