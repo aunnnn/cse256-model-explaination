@@ -9,7 +9,7 @@ plotly==3.7.0
 numpy==1.16.2
 matplotlib==3.0.3
 
-pickle
-sklearn
+pickle==4.0
+sklearn==0.20.3
 
 gunicorn
