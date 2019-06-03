@@ -24,12 +24,17 @@ display_mode_dropdown_options = [
     ('TF-IDF', FeatureDisplayMode.raw_feature_tfidf.value)
 ]
 
-input_initial_value = 'came in for some good after a long day at work some of the food i wanted wasnt ready and i understand that but the employee bianca refused to tell'
+input_initial_value = "Came in for some good after a long day at work. Some of the food I wanted wasn't ready, and I understand that, but the employee Bianca refused to tell"
+#'Insert your favorite review here!'
 
 class UserReviewComponent(BaseComponent):
+    """
+    Part 1: User Review
+    """
     def render(self, props=None):
         stores = html.Div([
             dcc.Store(id='memory', storage_type='memory'),
+            dcc.Store(id='sp_data', storage_type='memory'),
         ])
         return Container([
             Grid([
@@ -75,6 +80,32 @@ class UserReviewComponent(BaseComponent):
                         }),
                     ])),
                 ]),
+                html.Div(className="ui divider"),
+                Row([
+                    MultiColumn(2, Row([
+                        dcc.Markdown('### Sentiment Prediction:'),
+                        html.H4('Show Top-K', id='top-k-slider-label'),
+                        dcc.Slider(
+                            id='sp-top-k-slider',
+                            min=1,
+                            max=20,
+                            step=1,
+                            value=3,
+                            marks={
+                                1: {'label': '1'},
+                                20: {'label': '20'}
+                            }
+                        )
+                    ])),
+                    MultiColumn(14, Row([
+                        dcc.Graph(
+                            id='sentiment-prediction-graph',
+                            config={
+                                'displayModeBar': False,
+                            }
+                        ),
+                    ])),
+                ])
             ])
         ])
 
@@ -95,7 +126,7 @@ class UserReviewComponent(BaseComponent):
             new_text = model_analysis.preprocess(raw_input_text)
             data['preprocessed_input'] = new_text
             return data
-            
+
         @app.callback(
             Output(component_id='input-text-splitted', component_property='children'),
             [
@@ -128,12 +159,29 @@ class UserReviewComponent(BaseComponent):
 
             return html.Div(splitted_text_tags)
 
+        @app.callback(Output('top-k-slider-label', 'children'), [Input('sp-top-k-slider', 'value')])
+        def update_top_k_slider_label(top_k_value):
+            return f'Label Top-{top_k_value} features'
+
+        @app.callback(
+            Output('sentiment-prediction-graph', 'figure'),
+            [
+                Input('sp_data', 'data'),
+                Input('sp-top-k-slider', 'value')
+            ]
+        )
+        def on_sp_data_update(sp_data, top_k_value):
+            if sp_data is None:
+                return {}
+            return model_analysis.part1_create_sentiment_prediction_figure(sp_data, top_k=top_k_value)
+
         @app.callback(
             [
-                Output('coef-weight-graph', 'figure'), 
+                Output('coef-weight-graph', 'figure'),
                 Output('sorted-features', 'children'),
                 Output('prediction-output', 'children'),
                 Output('user-sentiment-icon', 'children'),
+                Output('sp_data', 'data'),
             ],
             [
                 Input('memory', 'data'),
@@ -148,9 +196,11 @@ class UserReviewComponent(BaseComponent):
                 result = model_analysis.part1_analyze_coefficients(preprocessed_input, display_mode=display_mode)
             except Exception as error:
                 print("Error:", error, "with args:", error.args)
-                return {}, html.Div(error.args[0]), None, DEFAULT_USER_SENTIMENT_ICON
+                return {}, html.Div(error.args[0]), None, DEFAULT_USER_SENTIMENT_ICON, None
 
-            figure = result['figure']
+            figure_fc = result['figure_feature_contribution']
+            sp_data = result['sp_data']
+
             features = result['human_sorted_features']
             values = result['human_sorted_values']
             relative_feature_strengths = result['relative_feature_strengths']
@@ -188,7 +238,18 @@ class UserReviewComponent(BaseComponent):
 
 
             # USER SENTIMENT ICON
-            sentiment_icon_class = 'smile' if pred_x else 'frown'
+            sentiment_icon_class = None
+            sentiment_label = None
+            if prob_x[1] >= 0.7:
+                sentiment_icon_class = 'smile' 
+                sentiment_label = 'POSITIVE'
+            elif prob_x[1] >= 0.4:
+                sentiment_icon_class = 'meh'
+                sentiment_label = 'MEH'
+            else:
+                sentiment_icon_class = 'frown'
+                sentiment_label = 'NEGATIVE'
+
             user_sentiment_icon = html.I(className=f'{sentiment_icon_class} outline icon')
 
             # PREDICTION OUTPUT BADGE
@@ -200,7 +261,7 @@ class UserReviewComponent(BaseComponent):
                     html.I(className='mini percent icon'),
                     ], className='value'),
                 html.Div([
-                    'POSITIVE' if pred_x else 'NEGATIVE',
+                    sentiment_label,
                     user_sentiment_icon,
                     ], className='label'),
             ], 
@@ -208,4 +269,4 @@ class UserReviewComponent(BaseComponent):
             style={
                 'display': 'block',
             })
-            return figure, detected_feature_tags_div, prediction_output_div, user_sentiment_icon
+            return figure_fc, detected_feature_tags_div, prediction_output_div, user_sentiment_icon, sp_data
