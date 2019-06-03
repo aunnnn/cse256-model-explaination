@@ -33,7 +33,7 @@ class UserReviewComponent(BaseComponent):
     """
     def render(self, props=None):
         stores = html.Div([
-            dcc.Store(id='memory', storage_type='memory'),
+            dcc.Store(id='text_input', storage_type='memory'),
             dcc.Store(id='sp_data', storage_type='memory'),
         ])
         return Container([
@@ -115,17 +115,13 @@ class UserReviewComponent(BaseComponent):
         # MEMORY DATA 
         ########################################
         @app.callback(
-            Output('memory', 'data'),
+            Output('text_input', 'data'),
             [Input('input-text', component_property='value')],
-            [State('memory', 'data')])
+            [State('text_input', 'data')])
         def on_raw_input_text_update(raw_input_text, data):
-            # Default data
-            data = data or {}
-
             # existing_text = data.get('preprocessed_input', '')
             new_text = model_analysis.preprocess(raw_input_text)
-            data['preprocessed_input'] = new_text
-            return data
+            return new_text
 
         @app.callback(
             Output(component_id='input-text-splitted', component_property='children'),
@@ -184,12 +180,12 @@ class UserReviewComponent(BaseComponent):
                 Output('sp_data', 'data'),
             ],
             [
-                Input('memory', 'data'),
+                Input('text_input', 'data'),
                 Input('weight-display-mode', 'value')
             ]
         )
-        def on_enter_input_text_show_weights(data, display_mode):
-            preprocessed_input = data['preprocessed_input']
+        def on_enter_input_text_show_weights(text_input, display_mode):
+            preprocessed_input = text_input
 
             try:
                 display_mode = FeatureDisplayMode(display_mode)
