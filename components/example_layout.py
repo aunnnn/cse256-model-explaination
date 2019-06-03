@@ -1,6 +1,6 @@
 import dash_html_components as html
 import dash_core_components as dcc
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from components.utils import *
 from components.base_component import BaseComponent
 
@@ -12,6 +12,7 @@ header_text = '''
 
 This is written in Markdown format using `Markdown(...)` (or `dcc.Markdown(...)`).
 '''
+
 
 # Create multiple bars
 def bar_graph_figure_from_values(values):
@@ -54,10 +55,13 @@ class ExampleLayout(BaseComponent):
             Row([
                 MultiColumn(3, [
                     Row([
-                        TextField(id='tf1', value=None, placeholder='Type something here'),
+                        TextField(id='tf1', value="What is that!", placeholder='Type something here'),
                     ]),
                     Row(html.Div("Sample callback", id='my-out-label'))
                 ]),
+            ]),
+            Row([
+                html.Div(None, id="text-splitted")
             ]),
             Row(html.H4("Callbacks can also map to plotly figure like below:")),
             Row([
@@ -76,6 +80,7 @@ class ExampleLayout(BaseComponent):
                 MultiColumn(6, MatplotlibFigure(id='mpl1', fig=fig, size_in_pixels=(300, 200))),
                 MultiColumn(6, MatplotlibFigure(id='mpl2', fig=fig, size_in_pixels=(300, 200))),
             ]),
+
         ])
 
     def register_callbacks(self, app):
@@ -83,17 +88,25 @@ class ExampleLayout(BaseComponent):
         Register all callback here
         """
         @app.callback(
-            Output(component_id='my-out-label', component_property='children'),
-            [Input(component_id='tf1', component_property='value')]
+            [
+                Output(component_id='my-out-label', component_property='children'),
+                Output(component_id='text-splitted', component_property='children'),
+            ],
+            [
+                Input(component_id='tf1', component_property='value'),
+            ],
         )
-        def update_text_from_textfield(input_value):
-            return f"You typed: {input_value}."
+        def update_text_from_textfield(input_value):            
+            texts = html.Div([html.A([
+                    w,
+                ], className="ui basic label", id="label") for w in input_value.split()])
+            return (f"You typed: {input_value}.",  texts)
 
 
         @app.callback(
             Output(component_id='example-graph', component_property='figure'),
             [Input(component_id='slider-1', component_property='value'),
-            Input(component_id='slider-2', component_property='value')]
+            Input(component_id='slider-2', component_property='value')],
         )
         def update_figure_from_slider1(slider_1, slider_2):
             return bar_graph_figure_from_values([np.arange(slider_1), np.arange(slider_2)])

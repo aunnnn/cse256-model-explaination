@@ -13,29 +13,44 @@ UNDEFINED = Component.UNDEFINED
 number_to_literal = {
     1: 'One', 2: 'Two', 3: 'Three', 4: 'Four', 
     5: 'Five', 6: 'Six', 7: 'Seven', 8: 'Eight', 
-    9: 'Nine', 10: 'Ten', 11: 'Eleven', 12: 'Twelve'
+    9: 'Nine', 10: 'Ten', 11: 'Eleven', 12: 'Twelve',
+    13: 'Thirteen', 14: 'Fourteen', 15: 'Fifteen', 16: 'Sixteen'
 }
 number_to_literal = {num: text.lower() for num, text in number_to_literal.items()}
 
 def Container(children):
-    return html.Div(children, className='container')
+    return html.Div(children, className='ui stackable grid container')
 
-def Row(children):
-    return html.Div(children, className='row')
+def Grid(children):
+    return html.Div(children, className='ui grid')
+
+def Row(children, **kwargs):
+    return html.Div(children, className='row', **kwargs)
 
 def MultiColumn(num_columns, children):
-    return html.Div(children, className=f'{number_to_literal[num_columns]} columns')
+    assert isinstance(num_columns, int), "num_columns must be integer."
+    assert num_columns >= 1 and num_columns <= 16, "Must: 1 <= num_columns <= 16"
+    return html.Div(children, className=f'{number_to_literal[num_columns]} wide column')
 
 def Markdown(md):
     return dcc.Markdown(md)
 
-def TextField(id, value=None, placeholder=None, label=None):
-    tf = dcc.Input(type='text', id=id, value=value, placeholder=placeholder)
-    return AddLabel(tf, label=label)
+def TextField(id, value=None, placeholder=None, label=None, style=None, debounce=False):
+    tf = dcc.Input(type='text', id=id, value=value, placeholder=placeholder, style=style, debounce=debounce)
+    return html.Div(AddLabel(tf, label=label), className="ui fluid input")
 
 def Slider(id, min, max, step=1, value=None, label=None):    
     return AddLabel(dcc.Slider(id, min=min, max=max, step=step, value=value), label)
 
+def Dropdown(id, options, default_text, value):
+    return html.Div([
+        dcc.Input(type='hidden', value=value, id=id),
+        html.I(className='dropdown icon'),
+        html.Div(default_text, className='default text'),
+        html.Div([
+            html.Div(d['label'], className='item', **{'data-value': d['value']}) for d in options
+        ], className='menu')
+    ], className='ui simple dropdown item')
 
 def AddLabel(html_input, label=None):
     """

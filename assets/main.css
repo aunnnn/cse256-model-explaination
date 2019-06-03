@@ -1,3 +1,29 @@
-.test-style {
-    color: blue;
+#app-header-text {
+    margin: 12px;
+}
+
+#app-header-text h1 {
+    font-size: 2.5em;
+}
+
+.ui.label {
+    user-select: none;
+    margin-bottom: 2px;
+    font-size: 1em;
+}
+
+#sorted-features {
+    padding: 6px;
+}
+
+#sorted-features .ui.label:hover {
+    transform: scale(1.2);
+}
+
+.ui.label.unseen {
+    opacity: 0.3;
+}
+
+.ui.label.unseen:hover {
+    transform: scale(1.2);
 }
