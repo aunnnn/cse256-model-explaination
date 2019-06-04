@@ -16,15 +16,27 @@
     padding: 6px;
 }
 
-#feature-in-context-explaination-div {
-    text-align: center;
+#sentence-samples-div li {
+    color: rgb(90,90, 90);
+    font-style: italic;
+}
+
+#sentence-samples-div ul span.feature-tag-highlighted {
+    padding: 0 6px;
+    display: inline-block;
+    color: black;
+}
+
+#sentence-samples-div ul span.feature-tag-highlighted:hover {
+    transform: scale(1.2);
 }
 
 #feature-in-context-explaination-div .segment {
-    margin: 0 auto;
+    padding: 0 auto;
 }
 
 #feature-in-context-explaination-div h4 {
+    text-align: center;
     font-size: 1.8em;
 }
 

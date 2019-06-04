@@ -12,7 +12,7 @@ clf = None
 
 sentiment = None
 trainX = None
-train_probs = None
+train_pred_probs = None
 
 fv_text_preprocessor = None
 fv_text_tokenize = None
@@ -36,7 +36,7 @@ def load_pickle(name):
 
 
 def initialize_global_vars():
-    global fv, clf, fv_text_tokenize, fv_text_preprocessor, sentiment, trainX, train_probs
+    global fv, clf, fv_text_tokenize, fv_text_preprocessor, sentiment, trainX, train_pred_probs
     global feature_names, feature_names_set, clf_coefficients, clf_intercept
 
     root_dir = os.getcwd()
@@ -54,4 +54,4 @@ def initialize_global_vars():
 
     sentiment = read_sentiment(os.path.join(root_dir, 'assets/model/sentiment.tar.gz'))
     trainX = fv.transform(sentiment.train_data)
-    train_probs = clf.predict_proba(trainX)
+    train_pred_probs = clf.predict_proba(trainX)

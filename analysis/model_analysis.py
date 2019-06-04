@@ -299,6 +299,7 @@ def part1_create_feature_in_context(feature, show_k_samples):
     fv = global_vars.fv
     sentiment = global_vars.sentiment
     trainX = global_vars.trainX
+    pred_probs = global_vars.train_pred_probs
 
     feature_ind = fv.vocabulary_[feature]
     found_in_training_inds = trainX[:, feature_ind].nonzero()[0]
@@ -327,7 +328,7 @@ def part1_create_feature_in_context(feature, show_k_samples):
     )
 
     pie_layout = go.Layout(
-        title=f"'{feature}'",
+        title=f"'{feature}' in training data",
     )
     
     pie_figure = go.Figure(data=[pie_trace], layout=pie_layout)
@@ -338,15 +339,40 @@ def part1_create_feature_in_context(feature, show_k_samples):
     positive_num_text = f'**{num_positives}**' if num_positives > num_negatives else num_positives
     negative_num_text = f'**{num_negatives}**' if num_negatives > num_positives else num_negatives
 
+    positive_negative_comparison_text = None
+    if num_positives == 0:
+        positive_negative_comparison_text = f"'{feature}' appears **only in negative context!**"
+    elif num_negatives == 0:
+        positive_negative_comparison_text = f"'{feature}' appears **only in positive context!**"
+    else:
+        pos_neg_ratio = num_positives / num_negatives
+        neg_pos_ratio = 1. / pos_neg_ratio
+        if pos_neg_ratio  >= 2:
+            positive_negative_comparison_text = f"'{feature}' appears **{int(pos_neg_ratio)} times in positive context** to negative context!"
+        elif neg_pos_ratio >= 2:
+            positive_negative_comparison_text = f"'{feature}' appears **{int(neg_pos_ratio)} times in negative context** to positive context!"
+        if positive_negative_comparison_text is not None:
+            positive_negative_comparison_text = f"""
+>
+> {positive_negative_comparison_text}
+>
+"""     
+        else:
+            positive_negative_comparison_text = ''
+
     md_explaination = f"""
 '{feature}' appears in {num_appears_in_train_set} training samples, from a total of {num_training_samples} samples{appearance_percent_text}.
 
 * {positive_num_text} of them are positive ({np.round(100*num_positives/num_appears_in_train_set, 2)}% of total appearances).
 * {negative_num_text} of them are negative ({np.round(100*num_negatives/num_appears_in_train_set, 2)}% of total appearances).
+
+{positive_negative_comparison_text}
     """
     return pie_figure, dict(
         md_explaination=md_explaination,
         positive_samples=[sentiment.train_data[ind] for ind in positive_inds],
         negative_samples=[sentiment.train_data[ind] for ind in negative_inds],
+        positive_samples_pred_probs = pred_probs[positive_inds],
+        negative_samples_pred_probs = pred_probs[negative_inds],
     )
 

@@ -6,7 +6,9 @@ from components.base_component import BaseComponent
 from analysis import model_analysis, global_vars
 from analysis.global_vars import UI_STYLES
 from analysis.model_analysis import FeatureDisplayMode, map_to_new_low_and_high
+from analysis.misc import rgba
 
+import re
 import numpy as np 
 
 header_md_text = """
@@ -72,8 +74,15 @@ class UserReviewComponent(BaseComponent):
                         config={ 
                             'displayModeBar': False,
                             # 'staticPlot': True,
-                    }))
+                    })),
                 ]),
+                Row([
+                    MultiColumn(16, html.P('Try click on one of feature bars above', style={
+                        'text-align': 'center',
+                        'font-style': 'italic',
+                        'text-color': 'silver',
+                    })),
+                ], id='feature-in-context-hint'),
                 Row([
                     MultiColumn(16, html.Div(id='feature-in-context-explaination-div')),
                     MultiColumn(16, [
@@ -84,7 +93,7 @@ class UserReviewComponent(BaseComponent):
                             }),
                         
                     ])
-                ]),
+                ], id = 'feature-in-context-row', style= {'display': 'none'}),
                 html.Div(className="ui divider"),
                 Row([
                     MultiColumn(2, Row([
@@ -120,6 +129,8 @@ class UserReviewComponent(BaseComponent):
             [
                 Output('feature-in-context-pie-graph', 'figure'),
                 Output('feature-in-context-explaination-div', 'children'),
+                Output('feature-in-context-row', 'style'), # show row
+                Output('feature-in-context-hint', 'style'), # hide hint
             ],
             [
                 Input('coef-weight-graph', 'clickData'),
@@ -127,14 +138,59 @@ class UserReviewComponent(BaseComponent):
         )
         def on_detected_feature_click(clickData):
             feature = clickData['points'][0]['y']
+            value = clickData['points'][0]['x']
+
             figure, metadata = model_analysis.part1_create_feature_in_context(feature, 3)
+
+            positive_samples = metadata['positive_samples']
+            negative_samples = metadata['negative_samples']
+            positive_samples_pred_probs = metadata['positive_samples_pred_probs']
+            negative_samples_pred_probs = metadata['negative_samples_pred_probs']
+
+            pos_color = rgba(*UI_STYLES.POSITIVE_COLOR, 0.7)
+            neg_color = rgba(*UI_STYLES.NEGATIVE_COLOR, 0.7)
+            feature_color = pos_color if value > 0 else neg_color
+
+            def get_formatted_list_from_samples_and_probs(samples, probs, highlight_color):
+                def get_formatted_list_item(sentence):
+                    # Here we split sentence by 'feature', then join it back with Span of 'feature', to show highlighting effects.
+                    non_match_components = re.compile(f'\\b{feature}\\b').split(sentence.lower()) # lowercase here to make things simpler                
+                    inserted_span_feature_in_between_result = ['"']
+                    for comp in non_match_components:
+                        inserted_span_feature_in_between_result.append(comp)
+                        inserted_span_feature_in_between_result.append(html.Span(feature, className='feature-tag-highlighted', style={'border-radius': 6, 'background-color': highlight_color}))
+                    inserted_span_feature_in_between_result.pop() # remove last one
+                    inserted_span_feature_in_between_result.append('"')
+                    return inserted_span_feature_in_between_result
+
+                return html.Ul([
+                    html.Li(get_formatted_list_item(sentence))
+                    for sentence, prob in zip(samples, probs)
+                ])
+
+            sentence_samples_div_children = []
+            if len(positive_samples) > 0:
+                sentence_samples_div_children.append(html.H5('Positive Samples:'))
+                sentence_samples_div_children.append(get_formatted_list_from_samples_and_probs(positive_samples, positive_samples_pred_probs, feature_color))
+
+            if len(negative_samples) > 0:
+                sentence_samples_div_children.append(html.H5('Negative Samples:'))
+                sentence_samples_div_children.append(get_formatted_list_from_samples_and_probs(negative_samples, negative_samples_pred_probs, feature_color))
+
             explaination_div = html.Div([
-                html.H4(f"Statistics of '{feature}'", className='ui header'),
+                html.H4([
+                    "Statistics of ",
+                    html.Span(feature, style={
+                        'border-radius': 8,
+                        'background-color': feature_color,
+                    }),
+                ], className='ui header'),
                 dcc.Markdown(metadata['md_explaination']),
+                html.Div(sentence_samples_div_children, id='sentence-samples-div'),
             ],
             className='ui piled compact segment',
             )
-            return figure, explaination_div
+            return figure, explaination_div, { 'display': 'block' }, { 'display': 'none' }
             
 
         ########################################
