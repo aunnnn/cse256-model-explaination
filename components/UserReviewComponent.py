@@ -72,13 +72,15 @@ class UserReviewComponent(BaseComponent):
                             ))
                         ], style={'margin-bottom': '10px'}),
                         html.Div(None, id="sorted-features"),
-                        dcc.Graph(
+                    ])),
+                ]),
+                Row([
+                    MultiColumn(16, dcc.Graph(
                         id='coef-weight-graph',
                         config={ 
                             'displayModeBar': False,
                             # 'staticPlot': True,
-                        }),
-                    ])),
+                    }))
                 ]),
                 html.Div(className="ui divider"),
                 Row([
