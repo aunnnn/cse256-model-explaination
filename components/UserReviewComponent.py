@@ -85,14 +85,14 @@ class UserReviewComponent(BaseComponent):
                 ], id='feature-in-context-hint'),
                 Row([
                     MultiColumn(16, html.Div(id='feature-in-context-explaination-div')),
-                    MultiColumn(16, [
-                        dcc.Graph(
-                            id='feature-in-context-pie-graph',
-                            config={
-                                'displayModeBar': False,
-                            }),
+                    # MultiColumn(16, [
+                    #     dcc.Graph(
+                    #         id='feature-in-context-pie-graph',
+                    #         config={
+                    #             'displayModeBar': False,
+                    #         }),
                         
-                    ])
+                    # ])
                 ], id = 'feature-in-context-row', style= {'display': 'none'}),
                 html.Div(className="ui divider"),
                 Row([
@@ -127,7 +127,7 @@ class UserReviewComponent(BaseComponent):
     
         @app.callback(
             [
-                Output('feature-in-context-pie-graph', 'figure'),
+                # Output('feature-in-context-pie-graph', 'figure'),
                 Output('feature-in-context-explaination-div', 'children'),
                 Output('feature-in-context-row', 'style'), # show row
                 Output('feature-in-context-hint', 'style'), # hide hint
@@ -177,20 +177,29 @@ class UserReviewComponent(BaseComponent):
                 sentence_samples_div_children.append(html.H5('Negative Samples:'))
                 sentence_samples_div_children.append(get_formatted_list_from_samples_and_probs(negative_samples, negative_samples_pred_probs, feature_color))
 
-            explaination_div = html.Div([
-                html.H4([
-                    "Statistics of ",
-                    html.Span(feature, style={
-                        'border-radius': 8,
-                        'background-color': feature_color,
-                    }),
-                ], className='ui header'),
-                dcc.Markdown(metadata['md_explaination']),
-                html.Div(sentence_samples_div_children, id='sentence-samples-div'),
-            ],
-            className='ui piled compact segment',
-            )
-            return figure, explaination_div, { 'display': 'block' }, { 'display': 'none' }
+            explaination_div = Grid([
+                MultiColumn(8, html.Div([
+                        html.H4([
+                            "Statistics of ",
+                            html.Span(feature, style={
+                                'border-radius': 8,
+                                'background-color': feature_color,
+                            }),
+                        ], className='ui header'),
+                        dcc.Markdown(metadata['md_explaination']),
+                        html.Div(sentence_samples_div_children, id='sentence-samples-div'),
+                    ], 
+                    className='ui piled compact segment')),
+                MultiColumn(8, [
+                    dcc.Graph(
+                        figure=figure,
+                        id='feature-in-context-pie-graph',
+                        config={
+                            'displayModeBar': False,
+                        })
+                ])
+            ])
+            return explaination_div, { 'display': 'block' }, { 'display': 'none' }
             
 
         ########################################

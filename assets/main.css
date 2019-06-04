@@ -35,7 +35,7 @@
     padding: 0 auto;
 }
 
-#feature-in-context-explaination-div h4 {
+#feature-in-context-explaination-div .ui.header {
     text-align: center;
     font-size: 1.8em;
 }

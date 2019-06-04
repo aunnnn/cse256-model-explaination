@@ -22,7 +22,7 @@ def Container(children):
     return html.Div(children, className='ui container')
 
 def Grid(children):
-    return html.Div(children, className='ui grid')
+    return html.Div(children, className='ui stackable grid')
 
 def Row(children, **kwargs):
     return html.Div(children, className='row', **kwargs)
