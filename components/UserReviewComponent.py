@@ -13,11 +13,6 @@ header_md_text = """
 ## Part 1: User Review
 """
 
-DEFAULT_USER_SENTIMENT_ICON = [
-    html.I(className='user icon'),
-    html.I(className='comment icon'),
-]
-
 display_mode_dropdown_options = [
     ('Prediction Contribution', FeatureDisplayMode.prediction_contribution.value), 
     ('Feature Weight', FeatureDisplayMode.feature_weight.value),
@@ -43,10 +38,7 @@ class UserReviewComponent(BaseComponent):
                     dcc.Markdown(header_md_text),
                 ]),
                 Row([
-                    MultiColumn(2, html.H3([
-                        'Input ', 
-                        html.Div(DEFAULT_USER_SENTIMENT_ICON, id='user-sentiment-icon', style={'display': 'inline-block'})
-                    ])),
+                    MultiColumn(2, html.H3('Input:')),
                     MultiColumn(8, TextField(id='input-text', value=input_initial_value, placeholder='Type review here', style={
                         'min-width': '200px',
                     })),
@@ -180,7 +172,6 @@ class UserReviewComponent(BaseComponent):
                 Output('coef-weight-graph', 'figure'),
                 Output('sorted-features', 'children'),
                 Output('prediction-output', 'children'),
-                Output('user-sentiment-icon', 'children'),
                 Output('sp_data', 'data'),
             ],
             [
@@ -196,7 +187,7 @@ class UserReviewComponent(BaseComponent):
                 result = model_analysis.part1_analyze_coefficients(preprocessed_input, display_mode=display_mode)
             except Exception as error:
                 print("Error:", error, "with args:", error.args)
-                return {}, html.Div(error.args[0]), None, DEFAULT_USER_SENTIMENT_ICON, None
+                return {}, html.Div(error.args[0]), None, None
 
             figure_fc = result['figure_feature_contribution']
             sp_data = result['sp_data']
@@ -269,4 +260,4 @@ class UserReviewComponent(BaseComponent):
             style={
                 'display': 'block',
             })
-            return figure_fc, detected_feature_tags_div, prediction_output_div, user_sentiment_icon, sp_data
+            return figure_fc, detected_feature_tags_div, prediction_output_div, sp_data
