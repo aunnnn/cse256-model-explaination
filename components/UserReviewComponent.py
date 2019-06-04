@@ -40,7 +40,7 @@ class UserReviewComponent(BaseComponent):
                 Row([
                     MultiColumn(2, html.H3('Input:')),
                     MultiColumn(8, TextField(id='input-text', value=input_initial_value, placeholder='Type review here', style={
-                        'min-width': '200px',
+                        
                     })),
                     MultiColumn(6, html.Div(id='prediction-output')),
                 ]),
@@ -54,7 +54,7 @@ class UserReviewComponent(BaseComponent):
                         dcc.Markdown('### Features:'),
                     ])),
                     MultiColumn(14, Row([
-                        Row([
+                        Grid(html.Div([
                             MultiColumn(5, dcc.Dropdown(
                                 id='weight-display-mode',
                                 options=[{'label': lb, 'value': value} for lb, value in display_mode_dropdown_options],
@@ -62,7 +62,7 @@ class UserReviewComponent(BaseComponent):
                                 searchable=False,
                                 placeholder='Select Feature Display Type',
                             ))
-                        ], style={'margin-bottom': '10px'}),
+                        ], style={'margin-bottom': '10px'})),
                         html.Div(None, id="sorted-features"),
                     ])),
                 ]),
@@ -101,7 +101,9 @@ class UserReviewComponent(BaseComponent):
                     ])),
                 ]),
                 html.Div(className="ui divider"),
-                
+                Row([
+                    MultiColumn(2, dcc.Markdown('### Feature in Context:')),
+                ])
             ])
         ])
 

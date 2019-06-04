@@ -19,7 +19,7 @@ number_to_literal = {
 number_to_literal = {num: text.lower() for num, text in number_to_literal.items()}
 
 def Container(children):
-    return html.Div(children, className='ui stackable grid container')
+    return html.Div(children, className='ui container')
 
 def Grid(children):
     return html.Div(children, className='ui grid')

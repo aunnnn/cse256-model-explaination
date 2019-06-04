@@ -168,6 +168,7 @@ def part1_analyze_coefficients(sentence, display_mode):
         'layout': go.Layout(
             title=figure_title,
             yaxis=dict(autorange="reversed", automargin=True),
+            xaxis=dict(automargin=True),
         ),
     }
 
