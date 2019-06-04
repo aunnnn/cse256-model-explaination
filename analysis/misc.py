@@ -25,3 +25,54 @@ class RenameUnpickler(pickle.Unpickler):
 
 def renamed_load(file_obj):
     return RenameUnpickler(file_obj).load()
+
+
+def read_tsv(tar, fname):
+    member = tar.getmember(fname)
+    tf = tar.extractfile(member)
+    data = []
+    labels = []
+    for line in tf:
+        line = line.decode("utf-8")
+        (label,text) = line.strip().split("\t")
+        labels.append(label)
+        data.append(text)
+    return data, labels
+
+def read_sentiment(tarfname):
+    """
+    Read complete sentiment raw documents, without any preprocessing.
+    
+    Available fields: ['train_data', 'train_labels', 'dev_data', 'dev_labels', 'le', 'target_labels', 'trainy', 'devy']
+    """
+    import tarfile
+    tar = tarfile.open(tarfname, "r:gz")
+    trainname = "train.tsv"
+    devname = "dev.tsv"
+    for member in tar.getmembers():
+        if 'train.tsv' in member.name:
+            trainname = member.name
+        elif 'dev.tsv' in member.name:
+            devname = member.name
+            
+            
+    class Data: pass
+    sentiment = Data()
+    sentiment.train_data, sentiment.train_labels = read_tsv(tar,trainname)
+    sentiment.dev_data, sentiment.dev_labels = read_tsv(tar, devname)
+    
+    from sklearn import preprocessing
+    sentiment.le = preprocessing.LabelEncoder()
+    sentiment.le.fit(sentiment.train_labels)
+    sentiment.target_labels = sentiment.le.classes_
+    sentiment.trainy = sentiment.le.transform(sentiment.train_labels)
+    sentiment.devy = sentiment.le.transform(sentiment.dev_labels)
+    tar.close()
+    
+    return sentiment
+
+def rgba(r, g, b, a=None):
+    if a is None:
+        return f'rgb({r},{g},{b})'
+    else:
+        return f'rgba({r},{g},{b},{a})'

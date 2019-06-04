@@ -16,6 +16,22 @@
     padding: 6px;
 }
 
+#feature-in-context-explaination-div {
+    text-align: center;
+}
+
+#feature-in-context-explaination-div .segment {
+    margin: 0 auto;
+}
+
+#feature-in-context-explaination-div h4 {
+    font-size: 1.8em;
+}
+
+#feature-in-context-explaination-div p,ul {
+    font-size: 1.2em;
+}
+
 #sorted-features .ui.label:hover {
     transform: scale(1.2);
 }

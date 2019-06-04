@@ -2,7 +2,9 @@ import pickle
 import plotly.graph_objs as go
 import numpy as np
 
+from analysis.misc import rgba
 from analysis import global_vars
+from analysis.global_vars import UI_STYLES
 
 from enum import Enum
 
@@ -138,9 +140,10 @@ def part1_analyze_coefficients(sentence, display_mode):
         name = 'Positive',
         orientation = 'h',
         marker = {
-            'color': 'rgba(0, 116, 217, 0.7)',
+            'color': rgba(*UI_STYLES.POSITIVE_COLOR, 0.7),
+            'opacity': 0.7,
             'line': {
-                'color': 'rgb(0, 116, 217)',
+                'color': rgba(*UI_STYLES.POSITIVE_COLOR),
                 'width': 2,
             }
         },
@@ -152,9 +155,9 @@ def part1_analyze_coefficients(sentence, display_mode):
         name = 'Negative',
         orientation = 'h',
         marker = {
-            'color': 'rgba(176, 48, 96, 0.7)',
+            'color': rgba(*UI_STYLES.NEGATIVE_COLOR, 0.7),
             'line': {
-                'color': 'rgb(176, 48, 96)',
+                'color': rgba(*UI_STYLES.NEGATIVE_COLOR),
                 'width': 2,
             }
         }
@@ -167,8 +170,13 @@ def part1_analyze_coefficients(sentence, display_mode):
         ],
         'layout': go.Layout(
             title=figure_title,
-            yaxis=dict(autorange="reversed", automargin=True),
-            xaxis=dict(automargin=True),
+            yaxis=dict(
+                autorange="reversed", 
+                automargin=True,
+            ),
+            xaxis=dict(
+                automargin=True,
+            ),
         ),
     }
 
@@ -208,8 +216,7 @@ def part1_create_sentiment_prediction_figure(sp_data, top_k=10):
 
     clf_intercept = global_vars.clf_intercept
 
-    
-    sp_figure_data = []    
+    sp_figure_data = []
 
     base_strength = 0.3
 
@@ -223,40 +230,27 @@ def part1_create_sentiment_prediction_figure(sp_data, top_k=10):
     rest_negatives = negative_features[TOP_K_FEATURES:]
     total_rest_negative_value = abs(sum([v for _, v in rest_negatives]))
 
+    def __create_bar(name, value, show_text, x, marker_color, line_color): 
+        return go.Bar(
+            x = [x],
+            y = [value],
+            text = name if show_text else None,
+            name = name,
+            textposition='auto',
+            marker= {
+                'color': marker_color,
+                'line': {
+                    'color': line_color,
+                    'width': 1,
+                },
+            }
+        )
+
     def create_positive_bar(name, value, opacity, show_text):
-        line_dict = {
-            'color': 'rgb(0, 116, 217)',
-            'width': 1,
-        }
-        return go.Bar(
-            x = ['POSITIVE'],
-            y = [value],
-            text = name if show_text else None,
-            name = name,
-            textposition='auto',
-            marker= {
-                'color': f'rgba(0, 116, 217, {opacity})',
-                'line': line_dict
-            }
-        )
+        return __create_bar(name, value, show_text, 'POSITIVE', rgba(*UI_STYLES.POSITIVE_COLOR, opacity), rgba(*UI_STYLES.POSITIVE_COLOR))
+        
     def create_negative_bar(name, value, opacity, show_text):
-        line_dict = {
-            'color': 'rgb(176, 48, 96)',
-            'width': 1,
-        }
-        return go.Bar(
-            x = ['NEGATIVE'],
-            y = [value],
-            text = name if show_text else None,
-            name = name,
-            textposition='auto',
-            marker= {
-                'color': f'rgba(176, 48, 96, {opacity})',
-                'line': line_dict
-            }
-        )
-
-
+        return __create_bar(name, value, show_text, 'NEGATIVE', rgba(*UI_STYLES.NEGATIVE_COLOR, opacity), rgba(*UI_STYLES.NEGATIVE_COLOR))
 
     ##################
     # POSITIVE STACKS
@@ -300,3 +294,59 @@ def part1_create_sentiment_prediction_figure(sp_data, top_k=10):
 
     figure_sp_stacked_bars = go.Figure(data=sp_figure_data, layout=sp_stacked_bars_layout)
     return figure_sp_stacked_bars
+
+def part1_create_feature_in_context(feature, show_k_samples):
+    fv = global_vars.fv
+    sentiment = global_vars.sentiment
+    trainX = global_vars.trainX
+
+    feature_ind = fv.vocabulary_[feature]
+    found_in_training_inds = trainX[:, feature_ind].nonzero()[0]
+
+    found_preds = sentiment.trainy[found_in_training_inds]
+    positive_inds = found_in_training_inds[np.where(found_preds == 1)][:show_k_samples]
+    negative_inds = found_in_training_inds[np.where(found_preds == 0)][:show_k_samples]
+
+    num_training_samples = trainX.shape[0]
+    num_appears_in_train_set = len(found_in_training_inds)
+    num_not_appear_in_train_set = num_training_samples - num_appears_in_train_set
+
+    num_positives = sum(sentiment.trainy[found_in_training_inds])
+    num_negatives = num_appears_in_train_set - num_positives
+
+
+    pie_trace = go.Pie(
+        labels=['Positive context', 'Negative context', 'Not appear'], 
+        values=[num_positives, num_negatives, num_not_appear_in_train_set],
+        hoverinfo='label+percent', 
+        textinfo='value',
+        textfont=dict(size=16),
+        marker=dict(
+            colors=[rgba(*UI_STYLES.POSITIVE_COLOR), rgba(*UI_STYLES.NEGATIVE_COLOR), rgba(217, 217, 217, 0.5)], 
+        ),
+    )
+
+    pie_layout = go.Layout(
+        title=f"'{feature}'",
+    )
+    
+    pie_figure = go.Figure(data=[pie_trace], layout=pie_layout)
+
+    appearance_percent_value = np.round(100*num_appears_in_train_set/num_training_samples, 2)
+    appearance_percent_text = f' ({appearance_percent_value}%)' if appearance_percent_value != 0 else ''
+
+    positive_num_text = f'**{num_positives}**' if num_positives > num_negatives else num_positives
+    negative_num_text = f'**{num_negatives}**' if num_negatives > num_positives else num_negatives
+
+    md_explaination = f"""
+'{feature}' appears in {num_appears_in_train_set} training samples, from a total of {num_training_samples} samples{appearance_percent_text}.
+
+* {positive_num_text} of them are positive ({np.round(100*num_positives/num_appears_in_train_set, 2)}% of total appearances).
+* {negative_num_text} of them are negative ({np.round(100*num_negatives/num_appears_in_train_set, 2)}% of total appearances).
+    """
+    return pie_figure, dict(
+        md_explaination=md_explaination,
+        positive_samples=[sentiment.train_data[ind] for ind in positive_inds],
+        negative_samples=[sentiment.train_data[ind] for ind in negative_inds],
+    )
+

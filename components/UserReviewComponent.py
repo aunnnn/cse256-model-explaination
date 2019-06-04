@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 from components.utils import *
 from components.base_component import BaseComponent
 from analysis import model_analysis, global_vars
-from analysis.global_vars import GLOBAL_UI_STYLES
+from analysis.global_vars import UI_STYLES
 from analysis.model_analysis import FeatureDisplayMode, map_to_new_low_and_high
 
 import numpy as np 
@@ -54,7 +54,7 @@ class UserReviewComponent(BaseComponent):
                         dcc.Markdown('### Features:'),
                     ])),
                     MultiColumn(14, Row([
-                        Grid(html.Div([
+                        Row(html.Div([
                             MultiColumn(5, dcc.Dropdown(
                                 id='weight-display-mode',
                                 options=[{'label': lb, 'value': value} for lb, value in display_mode_dropdown_options],
@@ -73,6 +73,17 @@ class UserReviewComponent(BaseComponent):
                             'displayModeBar': False,
                             # 'staticPlot': True,
                     }))
+                ]),
+                Row([
+                    MultiColumn(16, html.Div(id='feature-in-context-explaination-div')),
+                    MultiColumn(16, [
+                        dcc.Graph(
+                            id='feature-in-context-pie-graph',
+                            config={
+                                'displayModeBar': False,
+                            }),
+                        
+                    ])
                 ]),
                 html.Div(className="ui divider"),
                 Row([
@@ -100,14 +111,31 @@ class UserReviewComponent(BaseComponent):
                         ),
                     ])),
                 ]),
-                html.Div(className="ui divider"),
-                Row([
-                    MultiColumn(2, dcc.Markdown('### Feature in Context:')),
-                ])
             ])
         ])
 
     def register_callbacks(self, app):
+    
+        @app.callback(
+            [
+                Output('feature-in-context-pie-graph', 'figure'),
+                Output('feature-in-context-explaination-div', 'children'),
+            ],
+            [
+                Input('coef-weight-graph', 'clickData'),
+            ]
+        )
+        def on_detected_feature_click(clickData):
+            feature = clickData['points'][0]['y']
+            figure, metadata = model_analysis.part1_create_feature_in_context(feature, 3)
+            explaination_div = html.Div([
+                html.H4(f"Statistics of '{feature}'", className='ui header'),
+                dcc.Markdown(metadata['md_explaination']),
+            ],
+            className='ui piled compact segment',
+            )
+            return figure, explaination_div
+            
 
         ########################################
         # MEMORY DATA 
@@ -205,7 +233,7 @@ class UserReviewComponent(BaseComponent):
                 v = values[i]
                 feature_strength = relative_feature_strengths[i]
 
-                className = f'ui {GLOBAL_UI_STYLES.POSITIVE_COLOR_CLASSNAME} label' if v > 0 else f'ui {GLOBAL_UI_STYLES.NEGATIVE_COLOR_CLASSNAME} label'
+                className = f'ui {UI_STYLES.POSITIVE_COLOR_CLASSNAME} label' if v > 0 else f'ui {UI_STYLES.NEGATIVE_COLOR_CLASSNAME} label'
                 html_data = {'data-tooltip': f"{np.round(v, 2)}", 'data-position': "top center"}
 
                 opacity = np.round(feature_strength, 2)
@@ -218,6 +246,7 @@ class UserReviewComponent(BaseComponent):
                     },
                 )
                 wrapper_div = html.Div(tag, style={
+                    'id': f'detected-feature-{i}',
                     'display': 'inline-block', 
                     'margin-right': '1.7px',
                     }, 
@@ -246,7 +275,7 @@ class UserReviewComponent(BaseComponent):
             user_sentiment_icon = html.I(className=f'{sentiment_icon_class} outline icon')
 
             # PREDICTION OUTPUT BADGE
-            color_class = GLOBAL_UI_STYLES.POSITIVE_COLOR_CLASSNAME if pred_x else GLOBAL_UI_STYLES.NEGATIVE_COLOR_CLASSNAME
+            color_class = UI_STYLES.POSITIVE_COLOR_CLASSNAME if pred_x else UI_STYLES.NEGATIVE_COLOR_CLASSNAME
             prediction_div_classname = f'ui {color_class} statistic'
             prediction_output_div = html.Div([
                 html.Div([
