@@ -105,7 +105,9 @@ class UserReviewComponent(BaseComponent):
                             }
                         ),
                     ])),
-                ])
+                ]),
+                html.Div(className="ui divider"),
+                
             ])
         ])
 
@@ -157,7 +159,7 @@ class UserReviewComponent(BaseComponent):
 
         @app.callback(Output('top-k-slider-label', 'children'), [Input('sp-top-k-slider', 'value')])
         def update_top_k_slider_label(top_k_value):
-            return f'Label Top-{top_k_value} features'
+            return f'Show Top-{top_k_value} features'
 
         @app.callback(
             Output('sentiment-prediction-graph', 'figure'),

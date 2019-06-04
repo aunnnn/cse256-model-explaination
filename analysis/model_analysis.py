@@ -152,7 +152,7 @@ def part1_analyze_coefficients(sentence, display_mode):
         name = 'Negative',
         orientation = 'h',
         marker = {
-            'color': 'rgb(176, 48, 96, 0.7)',
+            'color': 'rgba(176, 48, 96, 0.7)',
             'line': {
                 'color': 'rgb(176, 48, 96)',
                 'width': 2,
@@ -293,6 +293,7 @@ def part1_create_sentiment_prediction_figure(sp_data, top_k=10):
     sp_figure_data.append(sp_intercept_bar)
 
     sp_stacked_bars_layout = go.Layout(
+        title='Positiveness vs Negativeness',
         barmode='stack'
     )
 
