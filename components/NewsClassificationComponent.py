@@ -78,7 +78,9 @@ class NewsClassificationComponent(BaseComponent):
                         ]),
                     ], className='ui internally celled stackable grid'),
                 ], className='ui piled segment'
-                )), id='news-prediction-output-interactive-figures-segment'),
+                )), id='news-prediction-output-interactive-figures-segment', style={
+                    'opacity': 0,
+                }),
             ]),
             stores,
         ])
