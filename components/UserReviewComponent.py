@@ -44,7 +44,7 @@ class UserReviewComponent(BaseComponent):
                             dcc.Textarea(
                                 id='input-text',
                                 className='autosize-textarea',
-                                placeholder='Enter user review',
+                                placeholder='Enter user review to predict sentiment',
                                 value=input_initial_value,
                                 rows=3,
                             ), className='ui form', style={'padding': '8px'})

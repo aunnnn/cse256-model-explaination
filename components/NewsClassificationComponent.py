@@ -38,7 +38,7 @@ class NewsClassificationComponent(BaseComponent):
                             dcc.Textarea(
                                 id='news-text-input',
                                 className='autosize-textarea',
-                                placeholder='Enter news to classify',
+                                placeholder='Enter news content to predict category',
                                 value=input_initial_value,
                                 rows=3,
                             ),
