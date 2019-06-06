@@ -11,6 +11,7 @@ import plotly.graph_objs as go
 from analysis import global_vars
 
 from components.UserReviewComponent import UserReviewComponent
+from components.NewsClassificationComponent import NewsClassificationComponent
 
 external_stylesheets = [
     'https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css',
@@ -21,6 +22,7 @@ external_scripts = [
     'https://code.jquery.com/jquery-3.4.1.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js',
     '/assets/main.js',
+    '/assets/autosize.min.js',
 ]
 
 #### New classification components
@@ -118,7 +120,7 @@ class Page(Enum):
         if self == Page.UserReview:
             return UserReviewComponent().render()
         elif self == Page.NewsClassification:
-            return html.Div([GraphOne, html.Img(src=wordle_url, title='Wordle Plot of the keywords in News Articles ', style={'align-content': 'center'}) ])
+            return NewsClassificationComponent().render()
         else:
             raise ValueError('Invalid value')
 
@@ -130,11 +132,16 @@ app = dash.Dash(
     __name__, 
     external_stylesheets=external_stylesheets,
     external_scripts=external_scripts,
-    static_folder='assets')
+    static_folder='assets',
+    meta_tags=[
+        {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+    ],
+)
 
 app.config['suppress_callback_exceptions'] = True
 
-global_vars.initialize_global_vars()
+global_vars.initialize_global_vars_for_user_review_section()
+global_vars.initialize_global_vars_for_news_section()
 
 # Root of all views
 root_layout = html.Div([
@@ -148,11 +155,11 @@ root_layout = html.Div([
         id='app-header-text'
     ),
 
-    dcc.Tabs(id="tabs", value=Page.UserReview.value, children=[
+    html.Div(dcc.Tabs(id="tabs", value=Page.UserReview.value, children=[
         dcc.Tab(label=page.title, value=page.value) for page in pages        
-    ]),
+    ])),
 
-    html.Div(id='page-content'),
+    html.Div(id='page-content', style={'padding-top': '30px'}),
 ])
 
 # Link Tab to URL & Content (page content, url's pathname)
@@ -188,9 +195,7 @@ app.title = 'CSE 256 - Model Explanation'
 
 # Register all page's callbacks
 UserReviewComponent().register_callbacks(app)
-
-# Can only register after render
-# main_layout.register_callbacks(app)
+NewsClassificationComponent().register_callbacks(app)
 
 # Server when deploy* (see `Procfile`)
 server = app.server
