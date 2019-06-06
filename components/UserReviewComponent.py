@@ -11,6 +11,7 @@ from analysis.misc import rgba
 
 import re
 import numpy as np 
+import pandas as pd
 
 display_mode_dropdown_options = [
     ('Prediction Contribution', FeatureDisplayMode.prediction_contribution.value), 
@@ -20,6 +21,22 @@ display_mode_dropdown_options = [
 
 input_initial_value = "Came in for some good after a long day at work. Some of the food I wanted wasn't ready, and I understand that, but the employee Bianca refused to tell"
 #'Insert your favorite review here!'
+
+
+df_positive = pd.read_csv('https://raw.githubusercontent.com/saideepreddy91/Statistical-NLP/master/IV_Positive.csv')
+df_negative = pd.read_csv('https://raw.githubusercontent.com/saideepreddy91/Statistical-NLP/master/IV_Negative.csv')
+
+def generate_table(dataframe, max_rows=10):
+    return html.Table(
+        # Header
+        [html.Tr([html.Th(col) for col in dataframe.columns])] +
+
+        # Body
+        [html.Tr([
+            html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+        ]) for i in range(min(len(dataframe), max_rows))]
+    )
+
 
 class UserReviewComponent(BaseComponent):
     """
@@ -131,6 +148,14 @@ class UserReviewComponent(BaseComponent):
                             }
                         ),
                     ])),
+                ]), 
+                html.Div(className="ui divider"),
+                Row([
+                    MultiColumn(2, Row([
+                        dcc.Markdown('### Information Value:'),])),
+                    MultiColumn(2, ""),
+                    MultiColumn(4, generate_table(df_positive)),
+                    MultiColumn(4, generate_table(df_negative)),
                 ]),
             ]),
             stores,
