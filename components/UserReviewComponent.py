@@ -97,14 +97,6 @@ class UserReviewComponent(BaseComponent):
                 ], id='feature-in-context-hint'),
                 Row([
                     MultiColumn(16, html.Div(id='feature-in-context-explaination-div')),
-                    # MultiColumn(16, [
-                    #     dcc.Graph(
-                    #         id='feature-in-context-pie-graph',
-                    #         config={
-                    #             'displayModeBar': False,
-                    #         }),
-                        
-                    # ])
                 ], id = 'feature-in-context-row', style= {'display': 'none'}),
                 html.Div(className="ui divider"),
                 Row([
@@ -132,6 +124,11 @@ class UserReviewComponent(BaseComponent):
                         ),
                     ])),
                 ]),
+                html.Div(className="ui divider"),
+                Row([MultiColumn(16, html.H3("Information Value (IV)"))] +
+                    [MultiColumn(8, dcc.Graph(figure=fig, config={'displayModeBar': False}))
+                    for fig in model_analysis_user_review.get_information_values_for_top_positive_and_negative_features()]
+                ),
             ]),
             stores,
         ])

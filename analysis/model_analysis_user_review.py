@@ -375,4 +375,87 @@ def part1_create_feature_in_context(feature, show_k_samples):
         positive_samples_pred_probs = pred_probs[positive_inds],
         negative_samples_pred_probs = pred_probs[negative_inds],
     )
+    
+
+def get_information_values_for_top_positive_and_negative_features():
+
+    top_negatives = [
+        ('the worst', 0.555712),
+        ('horrible', 0.195638),
+        ('worst', 0.184547),
+        ('not', 0.183855),
+        ('terrible', 0.100446),
+        ('rude', 0.091172),
+        ('bad', 0.054171),
+        ('asked', 0.034427),
+        ('disappointed', 0.030780),
+        ('slow', 0.030436),
+    ]
+
+    top_positives = [
+        ('great', 0.217689),
+        ('amazing', 0.148440),
+        ('delicious', 0.123200),
+        ('awesome', 0.097469),
+        ('love', 0.094778),
+        ('excellent', 0.092318),
+        ('love this', 0.063266),
+        ('favorite', 0.056707),
+        ('perfect', 0.041055),
+        ('fantastic', 0.036014),
+    ]
+
+    top_positive_iv_bars = go.Bar(
+        y = [iv for _, iv in top_positives],
+        x = [feature for feature, _ in top_positives],
+        name = 'Most informative features for positive',
+        marker = {
+            'color': rgba(*UI_STYLES.POSITIVE_COLOR, 0.7),
+            'opacity': 0.7,
+            'line': {
+                'color': rgba(*UI_STYLES.POSITIVE_COLOR),
+                'width': 2,
+            }
+        },
+    )
+    top_negative_iv_bars = go.Bar(
+        y = [iv for _, iv in top_negatives],
+        x = [feature for feature, _ in top_negatives],
+        name = 'Most informative features for negative labeling',
+        marker = {
+            'color': rgba(*UI_STYLES.NEGATIVE_COLOR, 0.7),
+            'opacity': 0.7,
+            'line': {
+                'color': rgba(*UI_STYLES.NEGATIVE_COLOR),
+                'width': 2,
+            }
+        },
+    )
+    top_positive_layout = go.Layout(
+        title="Most informative features (IV) for positive labeling",
+        yaxis=dict(
+            title='IV',
+            automargin=True,
+            fixedrange=True,
+        ),
+        xaxis=dict(
+            automargin=True,
+            fixedrange=True,
+        )
+    )
+    top_negative_layout = go.Layout(
+        title="Most informative features (IV) for negative labeling",
+        yaxis=dict(
+            title='IV',
+            automargin=True,
+            fixedrange=True,
+        ),
+        xaxis=dict(
+            automargin=True,
+            fixedrange=True,
+        )
+    )
+    return go.Figure([top_positive_iv_bars], top_positive_layout), go.Figure([top_negative_iv_bars], top_negative_layout)
+
+
 
