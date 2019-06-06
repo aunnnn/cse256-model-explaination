@@ -125,7 +125,7 @@ class UserReviewComponent(BaseComponent):
                     ])),
                 ]),
                 html.Div(className="ui divider"),
-                Row([MultiColumn(16, html.H3("Information Value (IV)"))] +
+                Row([MultiColumn(16, html.H3("Information Value (IV) from the training set"))] +
                     [MultiColumn(8, dcc.Graph(figure=fig, config={'displayModeBar': False}))
                     for fig in model_analysis_user_review.get_information_values_for_top_positive_and_negative_features()]
                 ),
