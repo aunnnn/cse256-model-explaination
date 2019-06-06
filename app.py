@@ -4,9 +4,6 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 from enum import Enum
-import base64
-import pandas as pd
-import plotly.graph_objs as go
 
 from analysis import global_vars
 
@@ -15,7 +12,7 @@ from components.NewsClassificationComponent import NewsClassificationComponent
 
 external_stylesheets = [
     'https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css',
-    '/assets/main.css','https://codepen.io/chriddyp/pen/bWLwgP.css',
+    '/assets/main.css',
 ]
 
 external_scripts = [
@@ -24,80 +21,6 @@ external_scripts = [
     '/assets/main.js',
     '/assets/autosize.min.js',
 ]
-
-#### New classification components
-wordle_url = 'https://raw.githubusercontent.com/saideepreddy91/Statistical-NLP/master/wordle_256_final_project.png'
-
-df = pd.read_csv(
-    'https://gist.githubusercontent.com/chriddyp/' +
-    '5d1ea79569ed194d432e56108a04d188/raw/' +
-    'a9f9e8076b837d541398e999dcbac2b2826a81f8/'+
-    'gdp-life-exp-2007.csv')
-
-GraphOne = dcc.Graph(
-        id='life-exp-vs-gdp',
-        figure = {
-          "data": [
-            {
-              "values": [0.39606122622995155, 0.39035861598803323, 0.2135801577820151 ],
-              "labels": [
-                "CRIME",
-                "POLITICS",
-                "ENTERTAINMENT"
-              ],
-              "domain": {"column": 0},
-              "name": "Prediction Probability",
-              "hoverinfo":"label+percent+name",
-              "hole": .4,
-              "type": "pie"
-            },
-            {
-              "values": [27, 11, 25, 8, 1, 3, 25],
-              "labels": [
-                "Feature 1",
-                "Feature 2",
-                "Feature 3",
-                "Feature 4",
-                "Feature 5",
-                "Feature 6",
-                "Rest"
-              ],
-              #"text":["IV"],
-              "textposition":"inside",
-              "domain": {"column": 1},
-              "name": "IV",
-              "hoverinfo":"label+percent+name",
-              "hole": .4,
-              "type": "pie"
-            }],
-          "layout": {
-                "title":"Sample Donut/Pie Chart",
-                "grid": {"rows": 1, "columns": 2},
-                "annotations": [
-                    {
-                        "font": {
-                            "size": 12
-                        },
-                        "showarrow": False,
-                        "text": "Prediction",
-                        "x": 0.21,
-                        "y": 0.5
-                    },
-                    {
-                        "font": {
-                            "size": 10
-                        },
-                        "showarrow": False,
-                        "text": "Information Value",
-                        "x": 0.805,
-                        "y": 0.5
-                    }
-                ]
-            }
-        }
-    )
-
-#### End of News Classification components
 
 class Page(Enum):
     """
@@ -148,7 +71,7 @@ root_layout = html.Div([
     # dcc.Location(id='url', refresh=False),
     dcc.Markdown(
 """
-# CSE 256 Statistical NLP: Explanation of Classifier
+# CSE 256: Explanation of Classifier
 - Wirawit Rueopas (A53277204)
 - Saideep Reddy Pakkeer (A53269319)
 """,
