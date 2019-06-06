@@ -21,8 +21,8 @@ number_to_literal = {num: text.lower() for num, text in number_to_literal.items(
 def Container(children):
     return html.Div(children, className='ui container')
 
-def Grid(children):
-    return html.Div(children, className='ui stackable grid')
+def Grid(children, className='ui stackable grid'):
+    return html.Div(children, className=className)
 
 def Row(children, **kwargs):
     return html.Div(children, className='row', **kwargs)

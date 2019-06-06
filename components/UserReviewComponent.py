@@ -3,17 +3,14 @@ import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
 from components.utils import *
 from components.base_component import BaseComponent
-from analysis import model_analysis, global_vars
+from analysis import model_analysis_user_review
+from analysis.global_vars import user_review_model
 from analysis.global_vars import UI_STYLES
-from analysis.model_analysis import FeatureDisplayMode, map_to_new_low_and_high
+from analysis.model_analysis_user_review import FeatureDisplayMode, map_to_new_low_and_high
 from analysis.misc import rgba
 
 import re
 import numpy as np 
-
-header_md_text = """
-## Part 1: User Review
-"""
 
 display_mode_dropdown_options = [
     ('Prediction Contribution', FeatureDisplayMode.prediction_contribution.value), 
@@ -35,15 +32,23 @@ class UserReviewComponent(BaseComponent):
         ])
         return Container([
             Grid([
-                stores,
+                html.H2('Part 1: User Review'),
                 Row([
-                    dcc.Markdown(header_md_text),
-                ]),
-                Row([
-                    MultiColumn(2, html.H3('Input:')),
-                    MultiColumn(8, TextField(id='input-text', value=input_initial_value, placeholder='Type review here', style={
-                        
-                    })),
+                    MultiColumn(2, [
+                        html.H3('Input:'),
+                        html.Button('Random', id='user-review-random-input-button', className='ui primary button random-input-button'),
+                    ]),
+                    MultiColumn(8, 
+                        # TextField(id='input-text', value=input_initial_value, placeholder='Type review here')
+                        html.Div(
+                            dcc.Textarea(
+                                id='input-text',
+                                className='autosize-textarea',
+                                placeholder='Enter user review',
+                                value=input_initial_value,
+                                rows=3,
+                            ), className='ui form', style={'padding': '8px'})
+                        ),
                     MultiColumn(6, html.Div(id='prediction-output')),
                 ]),
                 Row([
@@ -62,6 +67,7 @@ class UserReviewComponent(BaseComponent):
                                 options=[{'label': lb, 'value': value} for lb, value in display_mode_dropdown_options],
                                 value=FeatureDisplayMode.prediction_contribution.value,
                                 searchable=False,
+                                clearable=False,
                                 placeholder='Select Feature Display Type',
                             ))
                         ], style={'margin-bottom': '10px'})),
@@ -77,11 +83,17 @@ class UserReviewComponent(BaseComponent):
                     })),
                 ]),
                 Row([
-                    MultiColumn(16, html.P('Try click on one of feature bars above', style={
-                        'text-align': 'center',
-                        'font-style': 'italic',
-                        'text-color': 'silver',
-                    })),
+                    MultiColumn(16, [
+                        html.Div(html.P('Click on one of the feature bars to see statistics', style={
+                            'text-align': 'center',
+                            'font-style': 'italic',
+                            'text-color': 'silver',
+                            'font-size': '18px',
+                        }), className='ui compact info message center aligned', style={
+                            'display':'table',
+                            'margin': '0 auto',
+                        })
+                    ]),
                 ], id='feature-in-context-hint'),
                 Row([
                     MultiColumn(16, html.Div(id='feature-in-context-explaination-div')),
@@ -120,14 +132,14 @@ class UserReviewComponent(BaseComponent):
                         ),
                     ])),
                 ]),
-            ])
+            ]),
+            stores,
         ])
 
     def register_callbacks(self, app):
     
         @app.callback(
             [
-                # Output('feature-in-context-pie-graph', 'figure'),
                 Output('feature-in-context-explaination-div', 'children'),
                 Output('feature-in-context-row', 'style'), # show row
                 Output('feature-in-context-hint', 'style'), # hide hint
@@ -140,7 +152,7 @@ class UserReviewComponent(BaseComponent):
             feature = clickData['points'][0]['y']
             value = clickData['points'][0]['x']
 
-            figure, metadata = model_analysis.part1_create_feature_in_context(feature, 3)
+            figure, metadata = model_analysis_user_review.part1_create_feature_in_context(feature, 3)
 
             positive_samples = metadata['positive_samples']
             negative_samples = metadata['negative_samples']
@@ -207,11 +219,10 @@ class UserReviewComponent(BaseComponent):
         ########################################
         @app.callback(
             Output('text_input', 'data'),
-            [Input('input-text', component_property='value')],
-            [State('text_input', 'data')])
-        def on_raw_input_text_update(raw_input_text, data):
+            [Input('input-text', component_property='value')])
+        def on_raw_input_text_update(raw_input_text):
             # existing_text = data.get('preprocessed_input', '')
-            new_text = model_analysis.preprocess(raw_input_text)
+            new_text = model_analysis_user_review.preprocess(raw_input_text)
             return new_text
 
         @app.callback(
@@ -224,8 +235,8 @@ class UserReviewComponent(BaseComponent):
             if input_text == '':
                 return html.Div('Empty input text.')
 
-            input_text = model_analysis.preprocess(input_text)
-            feature_names_set = global_vars.feature_names_set
+            input_text = model_analysis_user_review.preprocess(input_text)
+            feature_names_set = user_review_model.feature_names_set
 
             splitted_text_tags = []
             tokens = input_text.split()
@@ -260,7 +271,7 @@ class UserReviewComponent(BaseComponent):
         def on_sp_data_update(sp_data, top_k_value):
             if sp_data is None:
                 return {}
-            return model_analysis.part1_create_sentiment_prediction_figure(sp_data, top_k=top_k_value)
+            return model_analysis_user_review.part1_create_sentiment_prediction_figure(sp_data, top_k=top_k_value)
 
         @app.callback(
             [
@@ -279,7 +290,7 @@ class UserReviewComponent(BaseComponent):
 
             try:
                 display_mode = FeatureDisplayMode(display_mode)
-                result = model_analysis.part1_analyze_coefficients(preprocessed_input, display_mode=display_mode)
+                result = model_analysis_user_review.part1_analyze_coefficients(preprocessed_input, display_mode=display_mode)
             except Exception as error:
                 print("Error:", error, "with args:", error.args)
                 return {}, html.Div(error.args[0]), None, None
@@ -357,3 +368,12 @@ class UserReviewComponent(BaseComponent):
                 'display': 'block',
             })
             return figure_fc, detected_feature_tags_div, prediction_output_div, sp_data
+        @app.callback(
+            Output('input-text', 'value'),
+            [
+                Input('user-review-random-input-button', 'n_clicks'),
+            ],
+        )
+        def on_click_random_input_button(n_clicks):
+            if n_clicks == 0: return ''
+            return model_analysis_user_review.get_random_sample()
