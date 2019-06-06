@@ -83,3 +83,7 @@ span.news-feature-tag-highlighted {
 .ui.label.unseen:hover {
     transform: scale(1.2);
 }
+
+#news-prediction-output-interactive-figures-segment {
+    margin-bottom: 80px;
+}
