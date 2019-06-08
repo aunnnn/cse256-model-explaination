@@ -5,6 +5,13 @@ Team members:
 - Wirawit Rueopas (A53277204)
 - Saideep Reddy Pakkeer (A53269319)
 
+## Demo
+Either one should work:
+- https://cse256.herokuapp.com/ 
+- https://cse256.aunnnn.com/
+
+Note that it sends network requests everytime you type on the textbox to update prediction, so it will be slow.
+
 
 ## Installation
 This project is built with [Dash](https://dash.plot.ly), a Python framework for building interactive web applications.
