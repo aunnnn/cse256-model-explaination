@@ -107,3 +107,6 @@ venv
 *.pyc
 .DS_Store
 .env
+
+
+cse256-model-explaination-env/
